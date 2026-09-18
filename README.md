@@ -1,32 +1,29 @@
 # Aisamad
 
-A small, secure Gemini-powered AI assistant with a simple Hindi-friendly web interface.
+A secure, Hindi-friendly Gemini AI assistant with chat history, voice input, dark mode, rate limiting, and Render/Docker deployment support.
 
 ## Run locally
 
-1. Install Node.js 18 or newer.
-2. Install dependencies:
+```bash
+npm install
+cp .env.example .env
+npm start
+```
 
-   ```bash
-   npm install
-   ```
+Open `http://localhost:3000`. Keep `GEMINI_API_KEY` only in `.env` or your hosting provider's private environment variables.
 
-3. Create `.env` from `.env.example` and add a **new** Gemini API key:
+## Features
 
-   ```bash
-   cp .env.example .env
-   ```
+- Gemini backend with Hindi, Hinglish, and English replies
+- Conversation context (last 12 messages)
+- Browser-local chat history and clear-chat button
+- Optional browser voice input
+- Dark mode and responsive mobile UI
+- Basic API rate limiting: 20 requests per minute per client
+- `/api/health` endpoint for deployment checks
 
-4. Start Aisamad:
-
-   ```bash
-   npm start
-   ```
-
-5. Open http://localhost:3000
-
-The API key is used only on the server and is never sent to the browser. The JSONL file is currently used as style guidance; it is not model fine-tuning.
+The JSONL file is used as style guidance in the prompt; it is not model fine-tuning. Login/authentication is intentionally not included yet.
 
 ## Security
 
-Never commit `.env` or paste an API key into frontend code, GitHub, screenshots, or chat. The key previously shared publicly should be revoked and replaced in Google AI Studio.
+Never commit `.env`, API keys, passwords, OTPs, or private user data. Set a billing/usage limit in Google AI Studio. For production, also add authentication, a database, stronger abuse protection, and a privacy policy before storing user accounts or server-side conversations.

@@ -1,31 +1,33 @@
 <!doctype html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aisamad</title>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aisamad - tumhara Hindi-friendly AI assistant" />
+  <title>Aisamad — AI Assistant</title>
   <style>
-    body { margin: 0; font-family: system-ui, sans-serif; background: #f4f7fb; color: #172033; }
-    main { max-width: 760px; margin: 40px auto; padding: 24px; }
-    h1 { margin-bottom: 4px; } .sub { color: #667085; }
-    #chat { min-height: 380px; background: white; border-radius: 16px; padding: 18px; box-shadow: 0 4px 20px #17203312; }
-    .msg { padding: 12px 14px; margin: 10px 0; border-radius: 12px; white-space: pre-wrap; }
-    .user { background: #e7f0ff; margin-left: 12%; } .ai { background: #eef8ee; margin-right: 12%; }
-    form { display: flex; gap: 10px; margin-top: 16px; } textarea { flex: 1; resize: vertical; padding: 12px; border: 1px solid #ccd3df; border-radius: 10px; font: inherit; }
-    button { border: 0; border-radius: 10px; padding: 0 20px; background: #2563eb; color: white; font-weight: 700; cursor: pointer; }
-    button:disabled { opacity: .6; cursor: wait; }
+    :root { --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085; --border:#dce3ee; --primary:#2563eb; --user:#e7f0ff; --ai:#eef8ee; }
+    [data-theme="dark"] { --bg:#101827; --card:#182235; --text:#f3f6fb; --muted:#aab6c8; --border:#334158; --user:#20385d; --ai:#21412e; }
+    * { box-sizing:border-box } body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); transition:.2s }
+    main { max-width:860px; margin:0 auto; padding:24px 16px; min-height:100vh; display:flex; flex-direction:column }
+    header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px } h1 { margin:0 0 3px; font-size:clamp(1.5rem,4vw,2rem) } .sub { color:var(--muted); font-size:.93rem }
+    .actions { display:flex; gap:8px } button, select { border:1px solid var(--border); border-radius:10px; padding:9px 12px; background:var(--card); color:var(--text); cursor:pointer; font:inherit } .primary { background:var(--primary); color:#fff; border:0; font-weight:700 }
+    #chat { flex:1; min-height:430px; background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; box-shadow:0 6px 24px #17203312; overflow:auto }
+    .msg { padding:12px 14px; margin:10px 0; border-radius:14px; white-space:pre-wrap; line-height:1.5; max-width:86%; } .user { background:var(--user); margin-left:auto } .ai { background:var(--ai); margin-right:auto }
+    .typing { color:var(--muted); font-style:italic } form { display:flex; gap:10px; margin-top:14px } textarea { flex:1; resize:none; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--card); color:var(--text); font:inherit } button:disabled { opacity:.6; cursor:wait }
+    .hint { color:var(--muted); font-size:.8rem; margin-top:8px; text-align:center } @media(max-width:560px) { header { align-items:flex-start } .actions { flex-wrap:wrap; justify-content:flex-end } form { flex-wrap:wrap } textarea { flex-basis:100% } .primary { flex:1 } }
   </style>
 </head>
 <body><main>
-  <h1>🤖 Aisamad</h1><div class="sub">Tumhara apna Gemini-powered AI assistant</div>
-  <section id="chat"><div class="msg ai">Namaste! Main Aisamad hoon. Aaj main aapki kaise madad kar sakta hoon?</div></section>
-  <form id="form"><textarea id="message" rows="2" placeholder="Apna message likho..." required></textarea><button id="send">Bhejo</button></form>
-</main>
-<script>
-const form = document.querySelector('#form'), input = document.querySelector('#message'), chat = document.querySelector('#chat'), send = document.querySelector('#send');
-function add(text, cls) { const el = document.createElement('div'); el.className = `msg ${cls}`; el.textContent = text; chat.appendChild(el); chat.scrollTop = chat.scrollHeight; }
-form.addEventListener('submit', async e => { e.preventDefault(); const message = input.value.trim(); if (!message) return; add(message, 'user'); input.value = ''; send.disabled = true;
-  try { const r = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({message}) }); const data = await r.json(); add(data.reply || `Error: ${data.error || 'Unknown error'}`, 'ai'); }
-  catch (_) { add('Network error. Server check karo.', 'ai'); } finally { send.disabled = false; input.focus(); }
-});
+  <header><div><h1>🤖 Aisamad</h1><div class="sub">Tumhara apna Gemini-powered AI assistant</div></div><div class="actions"><select id="language" aria-label="Language"><option value="auto">Auto</option><option value="hi">हिन्दी</option><option value="en">English</option></select><button id="theme" title="Theme">🌙</button><button id="clear" title="Clear chat">🗑️</button></div></header>
+  <section id="chat" aria-live="polite"><div class="msg ai">Namaste! Main Aisamad hoon. Aaj main aapki kaise madad kar sakta hoon?</div></section>
+  <form id="form"><textarea id="message" rows="2" placeholder="Apna message likho... (Enter bhejne ke liye)" required></textarea><button type="button" id="mic" title="Voice input">🎙️</button><button class="primary" id="send">Bhejo</button></form><div class="hint">Aisamad ko Hindi, Hinglish ya English mein pooch sakte ho.</div>
+</main><script>
+const form=document.querySelector('#form'),input=document.querySelector('#message'),chat=document.querySelector('#chat'),send=document.querySelector('#send'),mic=document.querySelector('#mic');
+let history=JSON.parse(localStorage.getItem('aisamad-history')||'[]'); const save=()=>localStorage.setItem('aisamad-history',JSON.stringify(history.slice(-12)));
+function add(text,cls,store=true){const el=document.createElement('div');el.className=`msg ${cls}`;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;if(store){history.push({role:cls==='user'?'user':'model',text});save();}return el;}
+function clearChat(){history=[];save();chat.innerHTML='<div class="msg ai">Chat clear ho gayi. Main Aisamad hoon—phir se shuru karein?</div>';}
+document.querySelector('#clear').onclick=clearChat; document.querySelector('#theme').onclick=()=>{const dark=document.documentElement.dataset.theme==='dark';document.documentElement.dataset.theme=dark?'':'dark';document.querySelector('#theme').textContent=dark?'🌙':'☀️';};
+form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;add(message,'user');input.value='';send.disabled=mic.disabled=true;const typing=add('Aisamad soch raha hai…','ai',false);typing.classList.add('typing');try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history:history.slice(0,-1)})});const data=await r.json();typing.remove();add(data.reply||`Error: ${data.error||'Unknown error'}`,'ai');}catch(_){typing.remove();add('Network error. Server check karo.','ai');}finally{send.disabled=mic.disabled=false;input.focus();}});
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(SpeechRecognition){const rec=new SpeechRecognition();rec.lang='hi-IN';rec.onresult=e=>input.value+=e.results[0][0].transcript;mic.onclick=()=>rec.start();}else mic.disabled=true;
 </script></body></html>
