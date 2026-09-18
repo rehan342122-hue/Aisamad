@@ -1,66 +1,35 @@
-# Aisamad with Supabase
+# Aisamad — Firebase edition
 
-A secure, Hindi-friendly AI assistant foundation built with Express + Gemini + Supabase.
+Aisamad now uses **Firebase Authentication + Firestore** for the SaaS foundation and Gemini for AI responses.
 
-## What is included
+## What is ready
 
-- Supabase-ready auth routes
-- Conversation API for authenticated users
-- Gemini chat API
-- Security headers + rate limiting
-- Supabase schema template
-- Production-friendly environment config
+- Firebase Admin SDK server integration
+- Firebase ID-token verification for protected APIs
+- Firestore conversation CRUD APIs
+- Gemini chat endpoint with modes and history
+- Helmet security headers and rate limiting
+- Public `/api/config` endpoint for safe Firebase web configuration
 
-## Required setup
+## Setup
 
-1. Install dependencies
+1. Create a Firebase project.
+2. Enable **Authentication → Sign-in method → Email/Password**.
+3. Create a Firestore database.
+4. Create a Web App in Firebase Project Settings and copy its web configuration.
+5. Create a service account in Project Settings → Service accounts.
+6. Copy `.env.example` to `.env` and fill the values locally or in Render environment variables.
+7. Install and run:
 
 ```bash
 npm install
-```
-
-2. Create `.env` from `.env.example`
-
-```bash
-cp .env.example .env
-```
-
-3. Fill in your own values:
-
-- `GEMINI_API_KEY`
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
-4. Start app
-
-```bash
 npm start
 ```
 
-Then open `http://localhost:3000`.
+Open `http://localhost:3000`.
 
-## Supabase database schema
+## Security — strict rule
 
-Use the SQL in `supabase/schema.sql` in your Supabase SQL editor.
+Never commit `.env`, a service-account JSON file, `FIREBASE_PRIVATE_KEY`, Gemini keys, passwords, or OTPs. The Firebase web config is designed to be public, but Admin credentials are server-only. Set Firestore security rules and Gemini billing limits before launch.
 
-The schema includes:
-- `profiles` table
-- `conversations` table
-- `message_history` support pattern
-
-## Security notes
-
-- Never commit `.env` files
-- Keep service role keys only in server-side environment variables
-- Use Row Level Security (RLS) in Supabase for real user data
-- Use billing caps in Google AI Studio and Supabase for production
-
-## Production roadmap
-
-- user dashboard
-- login/register UI
-- per-user chat persistence
-- file upload and document understanding
-- admin panel
-- deployment on Vercel/Render
+The frontend still has local guest sessions; account UI and Firestore sync are the next frontend integration. The backend is already prepared for Firebase ID tokens from a Firebase client login.

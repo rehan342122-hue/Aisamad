@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /conversations/{conversationId} {
+      allow read, create, update, delete: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid) && (request.method != 'create' || request.resource.data.userId == request.auth.uid);
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
