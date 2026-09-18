@@ -1,8 +1,8 @@
 {
   "name": "aisamad",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
-  "description": "Aisamad - Firebase and Gemini SaaS AI assistant",
+  "description": "Aisamad premium Hindi-friendly AI assistant",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
   "engines": { "node": ">=18" },
