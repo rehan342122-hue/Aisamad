@@ -1,6 +1,39 @@
 # Aisamad
 
-A secure, Hindi-friendly Gemini AI assistant with chat history, voice input, voice replies, dark mode, rate limiting, and Render/Docker deployment support.
+A professional, secure, Hindi-friendly AI assistant with a modern chat UI, multi-session support, rendering, export/import, TTS, and deployment-ready configuration.
+
+## Roadmap / phases
+
+### Phase 1: Professional chat foundation
+- Modern responsive chat interface
+- Multi-session chat history
+- Mode switching: General / Study / Code / Support
+- Auto language behavior
+- Copy and speak actions
+- Export/import conversations
+- Stable server-side prompt handling
+- Rate limiting and health endpoint
+
+### Phase 2: Advanced AI workflows
+- Image understanding support
+- PDF/document analysis support
+- User context and memory improvements
+- Better code execution / coding workflow
+- Search-grounded answers
+
+### Phase 3: Product features
+- User authentication
+- Database-backed chat storage
+- Usage limits and billing control
+- Admin dashboard
+- Secure deployment and monitoring
+
+### Phase 4: Trusted product identity
+- Premium brand experience
+- Privacy policy and compliance
+- Better safety layers and moderation
+- Performance optimization and multilingual UX
+- Scalable provider abstraction for Gemini/OpenAI/Anthropic-style models
 
 ## Run locally
 
@@ -10,21 +43,8 @@ cp .env.example .env
 npm start
 ```
 
-Open `http://localhost:3000`. Keep `GEMINI_API_KEY` only in `.env` or your hosting provider's private environment variables.
-
-## Features
-
-- Gemini backend with Hindi, Hinglish, and English replies
-- Conversation context (last 12 messages)
-- Browser-local chat history and clear-chat button
-- Optional browser voice input
-- Text-to-speech voice replies with auto-speak toggle
-- Dark mode and responsive mobile UI
-- Basic API rate limiting: 20 requests per minute per client
-- `/api/health` endpoint for deployment checks
-
-The JSONL file is used as style guidance in the prompt; it is not model fine-tuning. Login/authentication is intentionally not included yet.
+Then open `http://localhost:3000`.
 
 ## Security
 
-Never commit `.env`, API keys, passwords, OTPs, or private user data. Set a billing/usage limit in Google AI Studio. For production, also add authentication, a database, stronger abuse protection, and a privacy policy before storing user accounts or server-side conversations.
+Never commit `.env`, API keys, passwords, OTPs, or private user data. Keep secrets only in local `.env` files or your hosting provider's private environment variables. Use usage caps, deployment limits, and a clear privacy policy before launching publicly.
