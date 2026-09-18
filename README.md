@@ -1,36 +1,66 @@
-# Aisamad SaaS foundation
+# Aisamad with Supabase
 
-A secure, Hindi-friendly Gemini AI app with multi-session UI, authentication API, SQLite persistence, file upload foundation, rate limiting, security headers, and deployment configuration.
+A secure, Hindi-friendly AI assistant foundation built with Express + Gemini + Supabase.
 
-## Run locally
+## What is included
+
+- Supabase-ready auth routes
+- Conversation API for authenticated users
+- Gemini chat API
+- Security headers + rate limiting
+- Supabase schema template
+- Production-friendly environment config
+
+## Required setup
+
+1. Install dependencies
 
 ```bash
 npm install
+```
+
+2. Create `.env` from `.env.example`
+
+```bash
 cp .env.example .env
+```
+
+3. Fill in your own values:
+
+- `GEMINI_API_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+4. Start app
+
+```bash
 npm start
 ```
 
-Open `http://localhost:3000`.
+Then open `http://localhost:3000`.
 
-## Backend capabilities
+## Supabase database schema
 
-- Gemini chat endpoint: `POST /api/chat`
-- Health check: `GET /api/health`
-- Register/login/me endpoints under `/api/auth`
-- Authenticated conversation CRUD under `/api/conversations`
-- Authenticated file upload: `POST /api/files` (10 MB limit)
-- SQLite database is created in `data/aisamad.sqlite`
-- Passwords are hashed with bcrypt; auth uses expiring JWTs
-- Helmet security headers and API rate limiting
+Use the SQL in `supabase/schema.sql` in your Supabase SQL editor.
 
-The current UI still supports guest chat and browser-local sessions. To connect account-backed sessions, send the JWT as `Authorization: Bearer <token>` from a future account screen. File storage is a secure upload foundation; PDF/image extraction and provider-specific vision calls are the next integration layer.
+The schema includes:
+- `profiles` table
+- `conversations` table
+- `message_history` support pattern
 
-## Production checklist
+## Security notes
 
-1. Set a strong `JWT_SECRET` in the hosting provider, never in Git.
-2. Set `GEMINI_API_KEY` only as a private environment variable.
-3. Use persistent disk or replace SQLite with managed Postgres before scaling beyond one instance.
-4. Add HTTPS, email verification, password reset, CSRF strategy, moderation, billing limits, and a privacy policy before accepting real users.
-5. Configure Gemini usage/billing caps.
+- Never commit `.env` files
+- Keep service role keys only in server-side environment variables
+- Use Row Level Security (RLS) in Supabase for real user data
+- Use billing caps in Google AI Studio and Supabase for production
 
-Never commit `.env`, API keys, passwords, OTPs, or private user data.
+## Production roadmap
+
+- user dashboard
+- login/register UI
+- per-user chat persistence
+- file upload and document understanding
+- admin panel
+- deployment on Vercel/Render
