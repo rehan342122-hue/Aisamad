@@ -1,6 +1,6 @@
 # Aisamad
 
-A secure, Hindi-friendly Gemini AI assistant with chat history, voice input, dark mode, rate limiting, and Render/Docker deployment support.
+A secure, Hindi-friendly Gemini AI assistant with chat history, voice input, voice replies, dark mode, rate limiting, and Render/Docker deployment support.
 
 ## Run locally
 
@@ -18,6 +18,7 @@ Open `http://localhost:3000`. Keep `GEMINI_API_KEY` only in `.env` or your hosti
 - Conversation context (last 12 messages)
 - Browser-local chat history and clear-chat button
 - Optional browser voice input
+- Text-to-speech voice replies with auto-speak toggle
 - Dark mode and responsive mobile UI
 - Basic API rate limiting: 20 requests per minute per client
 - `/api/health` endpoint for deployment checks

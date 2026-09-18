@@ -12,22 +12,179 @@
     header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px } h1 { margin:0 0 3px; font-size:clamp(1.5rem,4vw,2rem) } .sub { color:var(--muted); font-size:.93rem }
     .actions { display:flex; gap:8px } button, select { border:1px solid var(--border); border-radius:10px; padding:9px 12px; background:var(--card); color:var(--text); cursor:pointer; font:inherit } .primary { background:var(--primary); color:#fff; border:0; font-weight:700 }
     #chat { flex:1; min-height:430px; background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; box-shadow:0 6px 24px #17203312; overflow:auto }
-    .msg { padding:12px 14px; margin:10px 0; border-radius:14px; white-space:pre-wrap; line-height:1.5; max-width:86%; } .user { background:var(--user); margin-left:auto } .ai { background:var(--ai); margin-right:auto }
-    .typing { color:var(--muted); font-style:italic } form { display:flex; gap:10px; margin-top:14px } textarea { flex:1; resize:none; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--card); color:var(--text); font:inherit } button:disabled { opacity:.6; cursor:wait }
+    .msg { padding:12px 14px; margin:10px 0; border-radius:14px; white-space:pre-wrap; line-height:1.5; max-width:86%; display:flex; align-items:flex-end; gap:8px; }
+    .user { background:var(--user); margin-left:auto } .ai { background:var(--ai); margin-right:auto }
+    .msg-text { flex:1 }
+    .mini-btn { background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.08); border-radius:8px; padding:5px 8px; cursor:pointer; font-size:0.8rem }
+    .typing { color:var(--muted); font-style:italic }
+    form { display:flex; gap:10px; margin-top:14px } textarea { flex:1; resize:none; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--card); color:var(--text); font:inherit } button:disabled { opacity:.6; cursor:wait }
     .hint { color:var(--muted); font-size:.8rem; margin-top:8px; text-align:center } @media(max-width:560px) { header { align-items:flex-start } .actions { flex-wrap:wrap; justify-content:flex-end } form { flex-wrap:wrap } textarea { flex-basis:100% } .primary { flex:1 } }
   </style>
 </head>
 <body><main>
-  <header><div><h1>🤖 Aisamad</h1><div class="sub">Tumhara apna Gemini-powered AI assistant</div></div><div class="actions"><select id="language" aria-label="Language"><option value="auto">Auto</option><option value="hi">हिन्दी</option><option value="en">English</option></select><button id="theme" title="Theme">🌙</button><button id="clear" title="Clear chat">🗑️</button></div></header>
-  <section id="chat" aria-live="polite"><div class="msg ai">Namaste! Main Aisamad hoon. Aaj main aapki kaise madad kar sakta hoon?</div></section>
-  <form id="form"><textarea id="message" rows="2" placeholder="Apna message likho... (Enter bhejne ke liye)" required></textarea><button type="button" id="mic" title="Voice input">🎙️</button><button class="primary" id="send">Bhejo</button></form><div class="hint">Aisamad ko Hindi, Hinglish ya English mein pooch sakte ho.</div>
-</main><script>
-const form=document.querySelector('#form'),input=document.querySelector('#message'),chat=document.querySelector('#chat'),send=document.querySelector('#send'),mic=document.querySelector('#mic');
-let history=JSON.parse(localStorage.getItem('aisamad-history')||'[]'); const save=()=>localStorage.setItem('aisamad-history',JSON.stringify(history.slice(-12)));
-function add(text,cls,store=true){const el=document.createElement('div');el.className=`msg ${cls}`;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;if(store){history.push({role:cls==='user'?'user':'model',text});save();}return el;}
-function clearChat(){history=[];save();chat.innerHTML='<div class="msg ai">Chat clear ho gayi. Main Aisamad hoon—phir se shuru karein?</div>';}
-document.querySelector('#clear').onclick=clearChat; document.querySelector('#theme').onclick=()=>{const dark=document.documentElement.dataset.theme==='dark';document.documentElement.dataset.theme=dark?'':'dark';document.querySelector('#theme').textContent=dark?'🌙':'☀️';};
-form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;add(message,'user');input.value='';send.disabled=mic.disabled=true;const typing=add('Aisamad soch raha hai…','ai',false);typing.classList.add('typing');try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history:history.slice(0,-1)})});const data=await r.json();typing.remove();add(data.reply||`Error: ${data.error||'Unknown error'}`,'ai');}catch(_){typing.remove();add('Network error. Server check karo.','ai');}finally{send.disabled=mic.disabled=false;input.focus();}});
-input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(SpeechRecognition){const rec=new SpeechRecognition();rec.lang='hi-IN';rec.onresult=e=>input.value+=e.results[0][0].transcript;mic.onclick=()=>rec.start();}else mic.disabled=true;
-</script></body></html>
+  <header>
+    <div><h1>🤖 Aisamad</h1><div class="sub">Tumhara apna Gemini-powered AI assistant</div></div>
+    <div class="actions">
+      <select id="language" aria-label="Language"><option value="auto">Auto</option><option value="hi">हिन्दी</option><option value="en">English</option></select>
+      <button id="theme" title="Theme">🌙</button>
+      <button id="autoSpeak" title="Auto speech">🔊 Auto</button>
+      <button id="clear" title="Clear chat">🗑️</button>
+    </div>
+  </header>
+
+  <section id="chat" aria-live="polite"><div class="msg ai"><div class="msg-text">Namaste! Main Aisamad hoon. Aaj main aapki kaise madad kar sakta hoon?</div></div></section>
+
+  <form id="form">
+    <textarea id="message" rows="2" placeholder="Apna message likho... (Enter bhejne ke liye)" required></textarea>
+    <button type="button" id="mic" title="Voice input">🎙️</button>
+    <button class="primary" id="send">Bhejo</button>
+  </form>
+  <div class="hint">Aisamad ko Hindi, Hinglish ya English mein pooch sakte ho.</div>
+</main>
+
+<script>
+const form = document.querySelector('#form');
+const input = document.querySelector('#message');
+const chat = document.querySelector('#chat');
+const send = document.querySelector('#send');
+const mic = document.querySelector('#mic');
+const languageSelector = document.querySelector('#language');
+const autoSpeakButton = document.querySelector('#autoSpeak');
+const clearButton = document.querySelector('#clear');
+
+let history = JSON.parse(localStorage.getItem('aisamad-history') || '[]');
+let autoSpeakEnabled = localStorage.getItem('aisamad-auto-speak') === 'true';
+
+function updateAutoSpeakButton() {
+  autoSpeakButton.textContent = autoSpeakEnabled ? '🔊 Auto on' : '🔊 Auto off';
+  localStorage.setItem('aisamad-auto-speak', String(autoSpeakEnabled));
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window) || !text) return;
+  const lang = languageSelector.value;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang === 'hi' ? 'hi-IN' : lang === 'en' ? 'en-US' : 'hi-IN';
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  const voices = speechSynthesis.getVoices();
+  const preferredVoice = voices.find(v => v.lang.toLowerCase().startsWith(utterance.lang.toLowerCase().slice(0, 2))) || voices.find(v => /hi|en/i.test(v.lang));
+  if (preferredVoice) utterance.voice = preferredVoice;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
+function saveHistory() {
+  localStorage.setItem('aisamad-history', JSON.stringify(history.slice(-12)));
+}
+
+function add(text, cls, store = true) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `msg ${cls}`;
+
+  const content = document.createElement('div');
+  content.className = 'msg-text';
+  content.textContent = text;
+
+  wrapper.appendChild(content);
+
+  if (cls === 'ai') {
+    const speakBtn = document.createElement('button');
+    speakBtn.type = 'button';
+    speakBtn.className = 'mini-btn';
+    speakBtn.textContent = '🔊';
+    speakBtn.title = 'Speak answer';
+    speakBtn.addEventListener('click', () => speakText(text));
+    wrapper.appendChild(speakBtn);
+  }
+
+  chat.appendChild(wrapper);
+  chat.scrollTop = chat.scrollHeight;
+
+  if (store) {
+    history.push({ role: cls === 'user' ? 'user' : 'model', text });
+    saveHistory();
+  }
+
+  if (autoSpeakEnabled && cls === 'ai') speakText(text);
+  return wrapper;
+}
+
+function clearChat() {
+  history = [];
+  saveHistory();
+  chat.innerHTML = '<div class="msg ai"><div class="msg-text">Chat clear ho gayi. Main Aisamad hoon—phir se shuru karein?</div></div>';
+}
+
+clearButton.addEventListener('click', clearChat);
+autoSpeakButton.addEventListener('click', () => {
+  autoSpeakEnabled = !autoSpeakEnabled;
+  updateAutoSpeakButton();
+});
+
+updateAutoSpeakButton();
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (!message) return;
+
+  add(message, 'user');
+  input.value = '';
+  send.disabled = mic.disabled = true;
+
+  const typing = add('Aisamad soch raha hai…', 'ai', false);
+  typing.classList.add('typing');
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, history: history.slice(0, -1) })
+    });
+
+    const data = await response.json();
+    const answer = data.reply || `Error: ${data.error || 'Unknown error'}`;
+    typing.remove();
+    add(answer, 'ai');
+  } catch (_) {
+    typing.remove();
+    add('Network error. Server check karo.', 'ai');
+  } finally {
+    send.disabled = mic.disabled = false;
+    input.focus();
+  }
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    form.requestSubmit();
+  }
+});
+
+const themeButton = document.querySelector('#theme');
+themeButton.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  document.documentElement.dataset.theme = dark ? '' : 'dark';
+  themeButton.textContent = dark ? '🌙' : '☀️';
+});
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'hi-IN';
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    input.value = (input.value + ' ' + transcript).trim();
+  };
+  mic.addEventListener('click', () => recognition.start());
+} else {
+  mic.disabled = true;
+}
+</script>
+</body>
+</html>
