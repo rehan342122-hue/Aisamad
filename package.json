@@ -4,7 +4,7 @@
   "private": true,
   "description": "Aisamad premium Hindi-friendly AI assistant",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
+  "scripts": { "start": "node -r ./proxy-trust.js server.js" },
   "engines": { "node": ">=18" },
   "dependencies": {
     "dotenv": "^16.4.7",
