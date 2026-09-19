@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080d1d">
+  <meta name="description" content="Veyqora AI image studio">
+  <title>Veyqora Image Studio</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080d1d;--panel:#101936;--line:#26345b;--text:#f6f8ff;--muted:#9aa9c9;--brand:#8d7cff;--cyan:#38e1c0;--danger:#ff9da8}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(700px 380px at 80% -10%,#29356d 0,transparent 70%),var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+    .wrap{width:min(1100px,100%);margin:auto;padding:24px 16px 56px}.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}.brand{font-weight:800;font-size:21px;letter-spacing:.2px}.brand span{color:var(--cyan)}a{color:var(--muted);text-decoration:none}.hero{max-width:730px;margin:34px 0 25px}.eyebrow{color:var(--cyan);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:12px}.hero h1{font-size:clamp(32px,7vw,62px);line-height:1.02;margin:12px 0}.hero p{color:var(--muted);font-size:17px;line-height:1.6}.panel{background:#101936dd;border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 18px 70px #0005;backdrop-filter:blur(10px)}label{display:block;color:var(--muted);font-size:13px;margin:2px 0 8px}.prompt{width:100%;min-height:120px;resize:vertical;border:1px solid var(--line);border-radius:15px;background:#080e20;color:var(--text);padding:15px;font:inherit;outline:none}.prompt:focus{border-color:var(--brand);box-shadow:0 0 0 3px #8d7cff22}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:13px}.control{background:#0b1228;border:1px solid var(--line);border-radius:13px;padding:10px;color:var(--text);font:inherit;width:100%}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}.btn{border:0;border-radius:12px;padding:12px 17px;font:700 14px inherit;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--brand),#5d55d9)}.btn.secondary{background:#1b294b;border:1px solid var(--line)}.btn:disabled{opacity:.55;cursor:wait}.status{min-height:22px;color:var(--muted);margin:14px 2px 0}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:18px}.card{overflow:hidden;border:1px solid var(--line);background:#0b1228;border-radius:17px}.card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:#151f3d}.card footer{display:flex;justify-content:space-between;align-items:center;padding:10px;color:var(--muted);font-size:12px}.download{color:var(--cyan);font-weight:700}.tip{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5}@media(max-width:600px){.wrap{padding:16px 12px 35px}.controls{grid-template-columns:1fr 1fr}.controls .control:last-child{grid-column:1/-1}.panel{padding:13px;border-radius:18px}.hero{margin-top:24px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav class="nav"><div class="brand">Veyqora <span>AI</span></div><a href="/">← Chat par wapas</a></nav>
+    <section class="hero"><div class="eyebrow">AI image studio</div><h1>Idea ko visual banaao.</h1><p>Hindi ya English mein prompt likho. Lightweight interface low-end phones par bhi smooth rehne ke liye banaya gaya hai.</p></section>
+    <section class="panel">
+      <label for="prompt">Aap kya banana chahte ho?</label>
+      <textarea id="prompt" class="prompt" maxlength="1200" placeholder="Example: neon-lit futuristic city in Rajasthan, cinematic, ultra detailed..."></textarea>
+      <div class="controls"><select id="style" class="control" aria-label="Style"><option value="cinematic">Cinematic</option><option value="photorealistic">Photorealistic</option><option value="anime">Anime</option><option value="digital art">Digital art</option><option value="watercolor">Watercolor</option></select><select id="size" class="control" aria-label="Size"><option value="1024x1024">Square</option><option value="1280x720">Landscape</option><option value="720x1280">Portrait</option></select><select id="model" class="control" aria-label="Quality"><option value="flux">Standard</option><option value="turbo">Fast preview</option></select></div>
+      <div class="actions"><button id="generate" class="btn">✦ Generate image</button><button id="clear" class="btn secondary">Clear</button></div><div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="gallery" class="gallery"></div><p class="tip">Tip: subject, lighting, mood aur camera style likhne se result better hota hai. Secret API keys browser mein expose nahi ki jaati.</p>
+    </section>
+  </main>
+  <script>
+    const $=id=>document.getElementById(id), key='veyqora-images';
+    const saved=JSON.parse(localStorage.getItem(key)||'[]'); const gallery=$('gallery');
+    function render(){gallery.innerHTML=saved.map((x,i)=>`<article class="card"><img loading="lazy" src="${x.url}" alt="Generated image"><footer><span>${new Date(x.at).toLocaleDateString()}</span><a class="download" href="${x.url}" target="_blank" rel="noopener">Open ↗</a></footer></article>`).join('')}
+    function add(url){saved.unshift({url,at:Date.now()});saved.splice(8);localStorage.setItem(key,JSON.stringify(saved));render()}
+    $('generate').onclick=()=>{const p=$('prompt').value.trim();if(!p){$('status').textContent='Pehle prompt likho bhai.';return}const b=$('generate');b.disabled=true;$('status').textContent='Image tayyar ho rahi hai…';const [w,h]=$('size').value.split('x');const text=encodeURIComponent(`${p}, ${$('style').value}, high quality, detailed`);const url=`https://image.pollinations.ai/prompt/${text}?width=${w}&height=${h}&model=${$('model').value}&nologo=true&seed=${Date.now()}`;const img=new Image();img.onload=()=>{add(url);$('status').textContent='Image ready hai!';b.disabled=false};img.onerror=()=>{$('status').textContent='Image generate nahi ho saki, dobara try karo.';b.disabled=false};img.src=url};
+    $('clear').onclick=()=>{$('prompt').value='';$('status').textContent='';};render();
+  </script>
+</body>
+</html>

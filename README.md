@@ -1,5 +1,20 @@
-# Kiyara AI
+# Aisamad / Veyqora
 
-Kiyara AI is the premium, Hindi-friendly name and brand for this Firebase + Gemini assistant. The web app includes a PWA manifest, install prompt, custom AI logo, text chat, image analysis UI, voice input where supported, Firebase authentication, and Firestore-ready conversation APIs.
+Aisamad is a Hindi-friendly AI assistant. The new lightweight image studio is available at `/ai-studio.html` and keeps image generation separate from the chat UI so older, low-end devices do not pay the cost of loading a heavy editor.
 
-Run with `npm install && npm start`. Never commit Gemini keys, Firebase Admin credentials, passwords, or OTPs.
+## Run
+
+```bash
+npm install
+npm start
+```
+
+Set `GEMINI_API_KEY` only in Render Environment Variables or a local, untracked `.env` file. Never paste secrets into chat, frontend files, commits, or issues.
+
+## Production checklist
+
+- Verify `/api/health` after every deployment.
+- Keep API keys in Render secrets and rotate any key that was exposed.
+- Use HTTPS in production.
+- Test chat, login, image upload, small screens, slow networks, and reduced-motion mode.
+- The image studio stores only up to eight image URLs in local storage and uses lazy loading for low-memory devices.
